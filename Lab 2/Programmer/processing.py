@@ -1,5 +1,7 @@
 ''' 23.01.2024 - LAB 1 - SCRIPT FOR Å GENERERE FFT AV SIGNAL SOM LESES FRA ADC '''
 
+''' NOTEE: THE DC COMPONENT FROM THE ACOUSTIC SENSORS ARE 1.66V'''
+
 # Importerer pakker
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,9 +32,13 @@ if __name__ == "__main__":
     fs = 1/dt
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
 
+    dc_comp = 1.66
+    
+
 
 
 def plot_ADC_channels(sample_period, data):
+
 
     #Tidsakse
     t = np.arange(0, dt*len(data), dt)
