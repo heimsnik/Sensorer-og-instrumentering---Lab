@@ -25,7 +25,7 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import(sys.argv[1] or '../Data/sampledData_101128.bi') #sampledData_101128
+    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 2/Data/sampledData_111036.bin') #sampledData_101128 #sys.argv[1] or 
     dt = sample_period
     fs = 1/dt
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
@@ -42,7 +42,7 @@ def plot_ADC_channels(sample_period, data):
     #Lager en liste med offsets for å tydligere se signaler
     offset = np.arange(data.shape[1])
 
-    plt.plot(t[1:1000], data[1:1000])#-(offset/10))
+    plt.plot(t[1:], data[1:, 0:3])#-(offset/10))
 
     plt.xlabel("Tid [s]")
     plt.ylabel("Amplitude [V]")
