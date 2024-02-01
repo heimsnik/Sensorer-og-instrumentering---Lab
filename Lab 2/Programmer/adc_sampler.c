@@ -30,7 +30,7 @@ channel ADC without need for any input to initiate sampling.
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../pigpio-master/pigpio.h"
+#include "pigpio-master/pigpio.h"
 #include <math.h>
 #include <time.h>
 /////// USER SHOULD MAKE SURE THESE DEFINES CORRESPOND TO THEIR SETUP ///////
