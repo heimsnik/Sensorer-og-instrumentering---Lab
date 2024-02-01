@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
     if (argc < 3) {  // No filename supplied, get default
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
-        snprintf(hold_fname, 32, "../Data/sampledData_%02d:%02d:%02d.bin",
+        snprintf(hold_fname, 32, "../Data/sampledData_%02d%02d%02d.bin",
                  tm.tm_hour, tm.tm_min, tm.tm_sec);
         output_filename = hold_fname;
     } else {
