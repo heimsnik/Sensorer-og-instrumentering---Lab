@@ -113,11 +113,11 @@ def add_window():
 def correlation(data):
 
     #Korrelasjon mellom alle sensorer
-    r_12 = ss.correlate(data[1:, 0:1], data[1:, 1:2])
-    r_23 = ss.correlate(data[1:, 1:2], data[1:, 2:3])
-    r_13 = ss.correlate(data[1:, 0:1], data[1:, 2:3])
+    r_12 = ss.correlate(data[5:, 0:1], data[5:, 1:2])
+    r_23 = ss.correlate(data[5:, 1:2], data[5:, 2:3])
+    r_13 = ss.correlate(data[5:, 0:1], data[5:, 2:3])
 
-    t_r = ss.correlation_lags(len(data[1:, 0:1]), len(data[1:, 0:1]))
+    t_r = ss.correlation_lags(len(data[5:, 0:1]), len(data[5:, 0:1]))
 
     return t_r, r_12, r_23, r_13 
 
@@ -128,9 +128,9 @@ def plot_correlation(data):
 
     fig, ax = plt.subplots(2,1)
 
-    ax[0].plot(t, data[:, 0:1])
-    ax[0].plot(t, data[:, 1:2])
-    ax[0].plot(t, data[:, 2:3])
+    ax[0].plot(t[1:], data[1:, 0:1])
+    ax[0].plot(t[1:], data[1:, 1:2])
+    ax[0].plot(t[1:], data[1:, 2:3])
     ax[0].set_xlabel("Time [s]")
     ax[0].set_ylabel("Amplitude [V]")
 
