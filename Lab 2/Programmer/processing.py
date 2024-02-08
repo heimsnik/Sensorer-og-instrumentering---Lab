@@ -27,7 +27,7 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 2/Data/sampledData_111036.bin') #sampledData_101128 #sys.argv[1] or 
+    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 2/Data/sampledData_101128.bi') #sampledData_101128 #sys.argv[1] or 
     dt = sample_period
     fs = 1/dt
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
@@ -94,7 +94,7 @@ def plot_periodogram(data):
     plt.title("Periodogram av ADC-kanaler")
 
     plt.plot(freq[1:-1], 20*np.log10((abs(data_FFT[1:-1]))/max(abs(data_FFT[1:-2, 0]))))
-    add_window()
+    #add_window()
 
     plt.legend(('ADC1','ADC2','ADC3','ADC4','ADC5'), loc="upper right")
     plt.grid()
@@ -113,11 +113,11 @@ def add_window():
 def correlation(data):
 
     #Korrelasjon mellom alle sensorer
-    r_12 = ss.correlate(data[0], data[1])
-    r_23 = ss.correlate(data[1], data[2])
-    r_13 = ss.correlate(data[0], data[2])
+    r_12 = ss.correlate(data[1:, 0:1], data[1:, 1:2])
+    r_23 = ss.correlate(data[1:, 1:2], data[1:, 2:3])
+    r_13 = ss.correlate(data[1:, 0:1], data[1:, 2:3])
 
-    t_r = ss.correlation_lags(len(data[0]), len(data[0]))
+    t_r = ss.correlation_lags(len(data[1:, 0:1]), len(data[1:, 0:1]))
 
     return t_r, r_12, r_23, r_13 
 
@@ -128,22 +128,24 @@ def plot_correlation(data):
 
     fig, ax = plt.subplots(2,1)
 
-    ax[0].plot(t, data[0])
-    ax[0].plot(t, data[1])
-    ax[0].plot(t, data[2])
+    ax[0].plot(t, data[:, 0:1])
+    ax[0].plot(t, data[:, 1:2])
+    ax[0].plot(t, data[:, 2:3])
     ax[0].set_xlabel("Time [s]")
     ax[0].set_ylabel("Amplitude [V]")
 
     ax[1].plot(t_r/fs, r_12)
+    ax[1].plot(t_r/fs, r_23)
+    ax[1].plot(t_r/fs, r_13)
     ax[1].set_xlabel("Time [s]")
     ax[1].set_ylabel("Amplitude [V]")
 
     plt.show()
 
 
-plot_ADC_channels(sample_period, data)
+#plot_ADC_channels(sample_period, data)
 #plot_FFT(data)
 #plot_periodogram(data)
 #add_window()
-#plot_correlation(data)
+plot_correlation(data)
     
