@@ -124,7 +124,6 @@ def correlation(data):
 
     t_r = ss.correlation_lags(len(data[1:, 0:1]), len(data[1:, 0:1]))
 
-    print(r_12)
     return t_r, r_12, r_23, r_13 
 
 def n_values ():
