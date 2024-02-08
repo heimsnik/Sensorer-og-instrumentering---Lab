@@ -33,10 +33,17 @@ if __name__ == "__main__":
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
 
     dc_comp = 1.66
+
+    #Removing dc_comp for each element in data-array
+    for i in range(len(data[:, 0:1])):
+
+        data[i:i+1, :] -= dc_comp
     
+#sampledData_104504.bin 180
+#sampledData_104519.bin 150
+#sampledData_104533.bin 120
 
-
-
+'''             SYSTEMOPPSETT LAB           '''
 def plot_ADC_channels(sample_period, data):
 
 
@@ -110,39 +117,74 @@ def add_window():
     #plot_FFT(data_with_hanning)
     plot_periodogram(data_with_hanning)
 
+
+"""             ACOUSTICS LAB           """
 def correlation(data):
 
+    #Eks autokorrelasjon
+    r_11 = ss.correlate(data[1:, 0:1], data[1:, 0:1])
+
     #Korrelasjon mellom alle sensorer
-    r_12 = ss.correlate(data[5:, 0:1], data[5:, 1:2])
-    r_23 = ss.correlate(data[5:, 1:2], data[5:, 2:3])
-    r_13 = ss.correlate(data[5:, 0:1], data[5:, 2:3])
+    r_12 = ss.correlate(data[1:, 0:1], data[1:, 1:2])
+    r_23 = ss.correlate(data[1:, 1:2], data[1:, 2:3])
+    r_13 = ss.correlate(data[1:, 0:1], data[1:, 2:3])
 
-    t_r = ss.correlation_lags(len(data[5:, 0:1]), len(data[5:, 0:1]))
+    t_r = ss.correlation_lags(len(data[1:, 0:1]), len(data[1:, 0:1]))
 
-    return t_r, r_12, r_23, r_13 
+    return t_r, r_12, r_23, r_13, r_11
 
-def calc_angle(l12_max,l23_max,l13_max):
+def n_values():
+
+    t_r, r_12, r_23, r_13, r_11 = correlation(data)
+
+    max_12 = np.argmax(r_12)
+    max_23 = np.argmax(r_23)
+    max_13 = np.argmax(r_13)
+
+    n_12 = t_r[max_12]
+    n_23 = t_r[max_23]
+    n_13 = t_r[max_13]
+
+    return n_12, n_23, n_13
+
+def calc_angles():
+
+    l12_max, l23_max, l13_max = n_values()
+
     arg = (np.sqrt(3)*(l12_max+l13_max))/(l12_max-l13_max-2*l23_max)
-    return np.degrees(np.arctan2(np.sin(arg),np.cos(arg)))
+
+    print('Cosine: ' + str(np.cos(arg)))
+    print('Sine: ' + str(np.sin(arg)))
+
+    if (-l12_max+l13_max+2*l23_max) < 0:
+        arg += np.pi
+
+    return np.degrees(np.arctan2(np.sin(arg), np.cos(arg)))
+
 
 def plot_correlation(data):
 
     t = np.arange(0, dt*len(data), dt)
-    t_r, r_12, r_23, r_13 = correlation(data)
+    t_r, r_12, r_23, r_13, r_11 = correlation(data)
 
     fig, ax = plt.subplots(2,1)
 
-    ax[0].plot(t[1:], data[1:, 0:1])
-    ax[0].plot(t[1:], data[1:, 1:2])
-    ax[0].plot(t[1:], data[1:, 2:3])
+    ax[0].plot(t[1:], data[1:, 0:1], label = f'$x_{1}(t)$')
+    ax[0].plot(t[1:], data[1:, 1:2], label = f'$x_{2}(t)$')
+    ax[0].plot(t[1:], data[1:, 2:3], label = f'$x_{3}(t)$')
+    ax[0].legend(loc="upper right")
     ax[0].set_xlabel("Time [s]")
-    ax[0].set_ylabel("Amplitude [V]")
+    ax[0].set_ylabel("Spenning [V]")
 
-    ax[1].plot(t_r/fs, r_12)
-    ax[1].plot(t_r/fs, r_23)
-    ax[1].plot(t_r/fs, r_13)
+    #Autocorrelation
+    #ax[1].plot(t_r, r_11, label = f'$r_{11}$')
+    #Crosscorrelation
+    ax[1].plot(t_r, r_12, label = f'$r_{12}$')
+    ax[1].plot(t_r, r_23, label = f'$r_{23}$')
+    ax[1].plot(t_r, r_13, label = f'$r_{13}$')
+    ax[1].legend(loc="upper right")
     ax[1].set_xlabel("Time [s]")
-    ax[1].set_ylabel("Amplitude [V]")
+    ax[1].set_ylabel("Spenning [V]")
 
     plt.show()
 
@@ -151,5 +193,7 @@ def plot_correlation(data):
 #plot_FFT(data)
 #plot_periodogram(data)
 #add_window()
-plot_correlation(data)
+#plot_correlation(data)
+print('n-values: ' + str(n_values()))
+print('Degree: ' + str(calc_angles()))
     

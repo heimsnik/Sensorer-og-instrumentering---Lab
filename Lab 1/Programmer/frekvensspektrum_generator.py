@@ -146,26 +146,26 @@ def add_window():
 
 
 #############################################################################
-freq, data_FFT = plot_periodogram(data)
-freq, data_FFT_window = add_window()
+# freq, data_FFT = plot_periodogram(data)
+# freq, data_FFT_window = add_window()
 
-plt.xlabel("Frekvens [Hz]", fontsize=15)
-plt.ylabel("Relativ effekt [dB]", fontsize=15)
-plt.title("Periodogram av $x_{1}[n]$ med zero-padding", fontsize=17)
+# plt.xlabel("Frekvens [Hz]", fontsize=15)
+# plt.ylabel("Relativ effekt [dB]", fontsize=15)
+# plt.title("Periodogram av $x_{1}[n]$ med zero-padding", fontsize=17)
 
-plt.plot(freq, 20*np.log10((np.abs(data_FFT))/np.max(np.abs(data_FFT))))
-plt.plot(freq, 20*np.log10((np.abs(data_FFT_window))/np.max(np.abs(data_FFT_window))))
+# plt.plot(freq, 20*np.log10((np.abs(data_FFT))/np.max(np.abs(data_FFT))))
+# plt.plot(freq, 20*np.log10((np.abs(data_FFT_window))/np.max(np.abs(data_FFT_window))))
 
-plt.legend([f'$X_{1}(f)$'], loc="upper right", fontsize=15)
-plt.grid()
-plt.show()
+# plt.legend([f'$X_{1}(f)$'], loc="upper right", fontsize=15)
+# plt.grid()
+# plt.show()
 #############################################################################
 
 
-#plot_ADC_channels(sample_period, data)
+#plot_ADC_channels(sample_period, data[0:200])
 #func_FFT(data)
 #plot_FFT(data)
-#plot_periodogram(data)
+plot_periodogram(data)
 #add_window()
 
 
