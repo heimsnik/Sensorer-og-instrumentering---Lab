@@ -30,6 +30,19 @@ if __name__ == "__main__":
 
     dc_comp = 1.66
 
+def artificial_data():
+
+    n = 31250
+
+    t = np.arange(0, dt*n, dt)
+    x = np.sin(2*np.pi*300*t) + np.sin(2*np.pi*2200*t) + np.sin(2*np.pi*6000*t)
+
+    x_arr = np.array([x] * 5)
+
+    x_transpose = np.transpose(x_arr)
+
+    return x_transpose
+
 
 def plot_data(data_plot):
     #Tidsakse for samplede signaler
@@ -38,7 +51,7 @@ def plot_data(data_plot):
     colours = ['blue', 'red', 'purple', 'forestgreen']
 
     for i in range(4):
-        plt.plot(t[1:200]*10**3, data_plot[1:200, i:(i+1)], label=f'$x_{i+1}[n]$', color = colours[i])
+        plt.plot(t[:]*10**3, data_plot[:, i:(i+1)], label=f'$x_{i+1}[n]$', color = colours[i])
 
         plt.xlabel("Tid [ms]", fontsize=15)
         plt.ylabel("Amplitude [V]", fontsize=15)
@@ -49,8 +62,10 @@ def plot_data(data_plot):
         plt.grid()
         plt.show()  
 
+
 def zero_pad(data_pad):
-    n = 2**int(np.ceil(np.log2(len(data_pad)))) - len(data_pad)
+    #n = 2**int(np.ceil(np.log2(len(data_pad)))) - len(data_pad)
+    n = 10000
 
     data_pad_copy = data_pad.copy()
 
@@ -65,19 +80,32 @@ def zero_pad(data_pad):
     return padded_data
 
 
+def window(data_window):
+    hanning = np.hanning(len(data_window[:, 0]))
+
+    data_window_copy = data_window.copy()
+
+    for i in range(len(data_window_copy[:, 0])):
+
+        data_window_copy[i:i+1, :] *= hanning[i]
+
+    return data_window_copy
+
+
 #FFT for alle signaler
 def FFT(data_FFT):
 
-    FFT_ADC1 = np.fft.fftshift(np.fft.fft(data_FFT[:, 0], len(data_FFT[:, 0])))
-    FFT_ADC2 = np.fft.fftshift(np.fft.fft(data_FFT[:, 1], len(data_FFT[:, 0])))
-    FFT_ADC3 = np.fft.fftshift(np.fft.fft(data_FFT[:, 2], len(data_FFT[:, 0])))
-    FFT_ADC4 = np.fft.fftshift(np.fft.fft(data_FFT[:, 3], len(data_FFT[:, 0])))
-    FFT_ADC5 = np.fft.fftshift(np.fft.fft(data_FFT[:, 4], len(data_FFT[:, 0])))
+    FFT_ADC1 = np.fft.fftshift(np.fft.fft(data_FFT[1:, 0], len(data_FFT[1:, 0])))
+    FFT_ADC2 = np.fft.fftshift(np.fft.fft(data_FFT[1:, 1], len(data_FFT[1:, 0])))
+    FFT_ADC3 = np.fft.fftshift(np.fft.fft(data_FFT[1:, 2], len(data_FFT[1:, 0])))
+    FFT_ADC4 = np.fft.fftshift(np.fft.fft(data_FFT[1:, 3], len(data_FFT[1:, 0])))
+    FFT_ADC5 = np.fft.fftshift(np.fft.fft(data_FFT[1:, 4], len(data_FFT[1:, 0])))
 
     #Frekvensakse
     freq = np.fft.fftshift(np.fft.fftfreq(n=len(FFT_ADC1), d=sample_period))
 
     return FFT_ADC1, FFT_ADC2, FFT_ADC3, FFT_ADC4, FFT_ADC5, freq
+
 
 def plot_FFT(data, data_window, data_padded):
     FFT_ADC1, FFT_ADC2, FFT_ADC3, FFT_ADC4, FFT_ADC5, freq = FFT(data)
@@ -97,35 +125,24 @@ def plot_FFT(data, data_window, data_padded):
     plt.show()
 
 
-def plot_periodogram(data, data_window, data_padded):
-    FFT_ADC1, FFT_ADC2, FFT_ADC3, FFT_ADC4, FFT_ADC5, freq = FFT(data)
+def plot_periodogram(data_original, data_window, data_padded):
+    FFT_ADC1, FFT_ADC2, FFT_ADC3, FFT_ADC4, FFT_ADC5, freq = FFT(data_original)
     FFT_ADC1_window, FFT_ADC2_window, FFT_ADC3_window, FFT_ADC4_window, FFT_ADC5_window, freq_window = FFT(data_window)
     FFT_ADC1_padded, FFT_ADC2_padded, FFT_ADC3_padded, FFT_ADC4_padded, FFT_ADC5_padded, freq_padded = FFT(data_padded)
 
     plt.xlabel("Frekvens [Hz]", fontsize=15)
     plt.ylabel("Relativ effekt [dB]", fontsize=15)
     plt.title("Periodogram av $x_{1}[n]$", fontsize=17)
-    plt.plot(freq, 20*np.log10((np.abs(FFT_ADC1)/max(abs(FFT_ADC1)))))
-    #plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), color = 'g')
-    plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r')
-    plt.xlim(-1200,1200)
-    plt.ylim(-140, 5)
-    plt.legend([f'$X_{1}(f)$'], loc="upper right", fontsize=15)
+    plt.plot(freq, 20*np.log10((np.abs(FFT_ADC1)/max(abs(FFT_ADC1)))), label = 'X_1(f)')
+    plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), color = 'g')
+    #plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = 'X_1(f) padded')
+    #plt.xlim(-1200,1200)
+    #plt.ylim(-120, 5)
+    plt.legend(loc="upper right", fontsize=15)
     plt.grid()
     plt.show()
 
-
-def window(data_window):
-    hanning = np.hanning(len(data_window[:, 0]))
-
-    data_window_copy = data_window.copy()
-
-    for i in range(len(data_window_copy[:, 0])):
-
-        data_window_copy[i:i+1, :] *= hanning[i]
-
-    return data_window_copy
-
+x = artificial_data()
 
 #The original data zero-padded
 data_padded = zero_pad(data)
@@ -139,8 +156,10 @@ data_window_padded = zero_pad(data_window)
 #The padded data windowed
 data_padded_window = window(data_padded)
 
-plot_FFT(data, data_padded_window, data_padded)
-#plot_periodogram(data, data_padded_window, data_padded)
+#plot_FFT(data, data_padded_window, data_padded)
+plot_periodogram(data, data_window, data_window_padded)
+
+#plot_data(data)
 
 
  
