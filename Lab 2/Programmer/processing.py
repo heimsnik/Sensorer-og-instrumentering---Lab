@@ -27,7 +27,7 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import('C:/Users/cmhei/OneDrive/Dokumenter/Semester 6/TTK4280 Sensorer og instrumentering/Lab/Lab 2/Data/sampledData_101128.bin') #sampledData_101128 #sys.argv[1] or 
+    sample_period, data = raspi_import('C:/Users/cmhei/OneDrive/Dokumenter/Semester 6/TTK4280 Sensorer og instrumentering/Lab/Lab 2/Data/Calibration_180_deg/sampledData_111909.bin') #sampledData_101128 #sys.argv[1] or 
     dt = sample_period
     fs = 1/dt
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
@@ -151,15 +151,18 @@ def calc_angles():
 
     l12_max, l23_max, l13_max = n_values()
 
-    arg = (np.sqrt(3)*(l12_max+l13_max))/(l12_max-l13_max-2*l23_max)
+    y = (np.sqrt(3)*(l12_max+l13_max))
+    x = (l12_max-l13_max-2*l23_max)
+
+    arg = y/x
 
     print('Cosine: ' + str(np.cos(arg)))
     print('Sine: ' + str(np.sin(arg)))
 
-    if (-l12_max+l13_max+2*l23_max) < 0:
+    if (x) < 0:
         arg += np.pi
 
-    return np.degrees(np.arctan2(np.sin(arg), np.cos(arg)))
+    return np.degrees(np.arctan2(y, x))
 
 
 def plot_correlation(data):
@@ -196,4 +199,5 @@ def plot_correlation(data):
 #plot_correlation(data)
 print('n-values: ' + str(n_values()))
 print('Degree: ' + str(calc_angles()))
+
     
