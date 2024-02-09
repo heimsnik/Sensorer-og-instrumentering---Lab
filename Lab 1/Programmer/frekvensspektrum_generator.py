@@ -12,22 +12,22 @@ import csv
 import scipy.signal as ss
 import time
 
-DA_data = []
+# DA_data = []
 
-filename = "Scope_ADC_1_2_rev1.csv"
+# filename = "Scope_ADC_1_2_rev1.csv"
 
-with open(filename) as csvfile:
-    csvreader = csv.reader(csvfile)
+# with open(filename) as csvfile:
+#     csvreader = csv.reader(csvfile)
 
-    header = next(csvreader)
+#     header = next(csvreader)
 
-    for datapoint in csvreader:
+#     for datapoint in csvreader:
 
-        values = [float(value) for value in datapoint]
-        DA_data.append(values)
+#         values = [float(value) for value in datapoint]
+#         DA_data.append(values)
 
-time1 = [p[0] for p in DA_data]
-ch1 = [p[1] for p in DA_data]
+# time1 = [p[0] for p in DA_data]
+# ch1 = [p[1] for p in DA_data]
 
 
 def raspi_import(path, channels=5):
@@ -85,7 +85,7 @@ def plot_ADC_channels(sample_period, data_inn):
 def func_FFT(data_inn): #data_inn er sanns 1 kolonne
 
     n = 2**int(np.ceil(np.log2(len(data_inn)))) - len(data_inn)
-    data_inn = np.vstack((data_inn, np.zeros((n, len(data_inn)))))   
+    data_inn = np.vstack((data_inn, np.zeros((n, data_inn.shape[0]))))   
 
     #Beregner FFT for hver ADC kanal    
     data_FFT = np.fft.fft(data_inn, len(data_inn)) #n=2**int(np.ceil(np.log2(len(data))))
@@ -120,7 +120,7 @@ def plot_periodogram(data_inn):
     plt.ylabel("Relativ effekt [dB]", fontsize=15)
     plt.title("Periodogram av $x_{1}[n]$ med zero-padding", fontsize=17)
 
-    plt.plot(freq, 20*np.log10((np.abs(data_FFT))/np.max(np.abs(data_FFT))))
+    plt.plot(freq, 20*np.log10((abs(data_FFT))/max(abs(data_FFT))))
 
     plt.legend([f'$X_{1}(f)$'], loc="upper right", fontsize=15)
     plt.grid()
@@ -132,11 +132,10 @@ def plot_periodogram(data_inn):
 def add_window():
 
     #Bartlett, blackman, hamming, hanningm, kaiser
-    hanning = np.bartlett(len(data))
+    hanning = np.hanning(len(data))
 
-    for i in range(len(data)):
-
-        data[i, :] *= hanning[i]
+    for i in range(0, len(data[0])):
+        data[:,i] *= hanning
 
     #plot_FFT(data_with_hanning)
     freq, data_FFT_window = plot_periodogram(data)
@@ -146,26 +145,26 @@ def add_window():
 
 
 #############################################################################
-# freq, data_FFT = plot_periodogram(data)
-# freq, data_FFT_window = add_window()
+freq, data_FFT = plot_periodogram(data)
+freq, data_FFT_window = add_window()
 
-# plt.xlabel("Frekvens [Hz]", fontsize=15)
-# plt.ylabel("Relativ effekt [dB]", fontsize=15)
-# plt.title("Periodogram av $x_{1}[n]$ med zero-padding", fontsize=17)
+plt.xlabel("Frekvens [Hz]", fontsize=15)
+plt.ylabel("Relativ effekt [dB]", fontsize=15)
+plt.title("Periodogram av $x_{1}[n]$ med og uten zero-padding", fontsize=17)
 
-# plt.plot(freq, 20*np.log10((np.abs(data_FFT))/np.max(np.abs(data_FFT))))
-# plt.plot(freq, 20*np.log10((np.abs(data_FFT_window))/np.max(np.abs(data_FFT_window))))
+plt.plot(freq, 20*np.log10((abs(data_FFT))/max(abs(data_FFT))), label = 'uten')
+plt.plot(freq, 20*np.log10((abs(data_FFT_window))/max(abs(data_FFT_window))), label = 'med')
 
-# plt.legend([f'$X_{1}(f)$'], loc="upper right", fontsize=15)
-# plt.grid()
-# plt.show()
+plt.legend(loc="upper right", fontsize=15)
+plt.grid()
+plt.show()
 #############################################################################
 
 
-#plot_ADC_channels(sample_period, data[0:200])
+#plot_ADC_channels(sample_period, data)
 #func_FFT(data)
 #plot_FFT(data)
 plot_periodogram(data)
-#add_window()
+add_window()
 
 
