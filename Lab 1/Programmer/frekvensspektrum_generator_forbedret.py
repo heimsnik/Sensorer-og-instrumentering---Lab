@@ -209,10 +209,10 @@ def plot_periodogram(data_original, data_window, data_padded):
 
     plt.xlabel("Frekvens [Hz]", fontsize=17)
     plt.ylabel("Relativ effekt [dB]", fontsize=17)
-    plt.title(f"Periodogram av $x_{1}[n]$ med og uten zero-padding", fontsize=19)
+    plt.title(f"Periodogram av $x_{1}[n]$ med og uten hanningvindu", fontsize=19)
     plt.plot(freq, 20*np.log10((np.abs(FFT_ADC1)/max(abs(FFT_ADC1)))), label = f'$X_{1}(f)$')
-    #plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), label = f'$X_{1}(f)$ med hanningvindu+zero-padding', color = 'orange')
-    plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = f'$X_{1}(f)$ med zero-padding')
+    plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), label = f'$X_{1}(f)$ med hanningvindu', color = 'g')
+    #plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = f'$X_{1}(f)$ med zero-padding')
     plt.xlim(-300,300)
     plt.ylim(-120, 5)
     plt.xticks(size = 14)
@@ -236,7 +236,7 @@ data_window_padded = zero_pad(data_window)
 data_padded_window = window(data_padded)
 
 #plot_FFT(data, data_window, data_padded)
-plot_periodogram(data, data_window_padded, data_padded)
+plot_periodogram(data, data_window, data_padded)
 
 #plot_data(data)
 
