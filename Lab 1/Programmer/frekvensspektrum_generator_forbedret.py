@@ -8,6 +8,8 @@ import csv
 import scipy.signal as ss
 import time
 
+start_time = time.time()
+
 def raspi_import(path, channels=5):
 
     with open(path, 'r') as fid:
@@ -43,29 +45,101 @@ def artificial_data():
 
     return x_transpose
 
+def analog_signal():
+
+    header = []
+    analog_data = []
+    analog_data2 = []
+
+    filepath1 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/Scope_and_ADC_measurements/Scope_CH1_CH2.csv'
+    filepath2 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data\Scope_and_ADC_measurements/Scope_CH3_CH4.csv'
+
+
+    # Read data from the specified filepath
+    with open(filepath1) as csvfile:
+        csvreader = csv.reader(csvfile)
+        header = next(csvreader)
+        for datapoint in csvreader:
+            values = [float(value) for value in datapoint]
+            analog_data.append(values)
+
+    time1 = [p[0] for p in analog_data]
+    ch1 = [p[1] for p in analog_data]
+    ch2 = [p[2] for p in analog_data]
+
+    # Read data from the specified filepath
+    with open(filepath2) as csvfile:
+        csvreader = csv.reader(csvfile)
+        header = next(csvreader)
+        for datapoint in csvreader:
+            values = [float(value) for value in datapoint]
+            analog_data2.append(values)
+
+    time2 = [p[0] for p in analog_data2]
+    ch3 = [p[1] for p in analog_data2]
+    ch4 = [p[2] for p in analog_data2]
+    ch5 = [(ch4[i]+0.7) for i in range(len(ch4))]
+
+    plt.plot(time1,ch1, label=f'$x_{1}(t)$', color = 'blue', linestyle='--')
+    plt.plot(time1,ch2, label = f'$x_{2}(t)$', color = 'red', linestyle='--')
+    plt.plot(time2,ch3, label=f'$x_{3}(t)$', color = 'purple', linestyle='--')
+    plt.plot(time2,ch4, label =f'$x_{4}(t)$', color = 'forestgreen', linestyle='--')
+    plt.plot(time2,ch5, label =f'$x_{5}(t)$', color = 'cyan', linestyle='--')
+
+    plt.grid()
+    plt.xlim(0, 0.1)
+    plt.title(f'Analoge inngangssignaler til alle ADCer', fontsize = 19)
+    plt.xlabel('Tid [s]', fontsize=17)
+    plt.ylabel('Spenning [V]', fontsize=17)
+    plt.legend(loc='upper right', fontsize=14)
+
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14) 
+
+    plt.show()
+
+    return time1, ch1
+
 
 def plot_data(data_plot):
     #Tidsakse for samplede signaler
     t = np.arange(0, dt*len(data_plot[:, 0]), dt)
 
-    colours = ['blue', 'red', 'purple', 'forestgreen']
+    colours = ['blue', 'red', 'purple', 'forestgreen', 'cyan']
 
-    for i in range(4):
-        plt.plot(t[:]*10**3, data_plot[:, i:(i+1)], label=f'$x_{i+1}[n]$', color = colours[i])
+    print(np.transpose(data_plot))
+    
+    for i in range(len(data_plot[0, :])):
+        if i == 4:
+            data_plot[:, i:(i+1)] += 0.7
+        elif i == 0:
+            data_plot[:, i:(i+1)] += 0
+        else:
+            data_plot[:, i:(i+1)] += 0.06
 
-        plt.xlabel("Tid [ms]", fontsize=15)
-        plt.ylabel("Amplitude [V]", fontsize=15)
-        plt.title(f'Samplet signal av ADC {i+1}', fontsize = 17)
-        plt.legend(loc="upper right", fontsize=15)
-        plt.xticks(fontsize=13)
-        plt.yticks(fontsize=13) 
-        plt.grid()
-        plt.show()  
+    #time_analog, ch1 = analog_signal()
+    #plt.plot(time_analog,ch1, label=f'$x_{1}(t)$', color = 'blue', linestyle='--')
+
+    plt.plot(t, data_plot[:, 0], label=f'$x_{1}[n]$', color = colours[0])
+    plt.plot(t, data_plot[:, 1], label=f'$x_{2}[n]$', color = colours[1])
+    plt.plot(t, data_plot[:, 2], label=f'$x_{3}[n]$', color = colours[2])
+    plt.plot(t, data_plot[:, 3], label=f'$x_{4}[n]$', color = colours[3])
+    plt.plot(t, data_plot[:, 4], label=f'$x_{5}[n]$', color = colours[4])
+
+    plt.xlabel("Tid [s]", fontsize=17)
+    plt.ylabel("Spenning [V]", fontsize=17)
+    plt.title(f'Samplet signal av alle ADCer', fontsize = 19)
+    plt.legend(loc="upper right", fontsize=15)
+    plt.xlim(0,0.1)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14) 
+    plt.grid()
+    plt.show()  
 
 
 def zero_pad(data_pad):
-    #n = 2**int(np.ceil(np.log2(len(data_pad)))) - len(data_pad)
-    n = 10000
+    n = 2**int(np.ceil(np.log2(len(data_pad)))) - len(data_pad)
+    #n = 100000
 
     data_pad_copy = data_pad.copy()
 
@@ -81,6 +155,7 @@ def zero_pad(data_pad):
 
 
 def window(data_window):
+    #Bartlett, blackman, hamming, hanningm, kaiser
     hanning = np.hanning(len(data_window[:, 0]))
 
     data_window_copy = data_window.copy()
@@ -117,10 +192,10 @@ def plot_FFT(data, data_window, data_padded):
     plt.xlabel("Frekvens [Hz]", fontsize=15)
     plt.ylabel("Relativ effekt [dB]", fontsize=15)
     plt.title("Periodogram av $x_{1}[n]$", fontsize=17)
-    plt.plot(freq, abs(FFT_ADC1))
-    #plt.plot(freq_window, abs(FFT_ADC1_window), color = 'g')
-    plt.plot(freq_padded, abs(FFT_ADC1_padded), color = 'r')
-    #plt.xlim(-100,100)
+    plt.plot(freq, abs(FFT_ADC1)/max(abs(FFT_ADC1)))
+    plt.plot(freq_window, abs(FFT_ADC1_window)//max(abs(FFT_ADC1_window)), color = 'g')
+    #plt.plot(freq_padded, abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)), color = 'r')
+    plt.xlim(-100,100)
     #plt.ylim(-140, 5)
     plt.legend([f'$X_{1}(f)$'], loc="upper right", fontsize=15)
     plt.grid()
@@ -132,15 +207,17 @@ def plot_periodogram(data_original, data_window, data_padded):
     FFT_ADC1_window, FFT_ADC2_window, FFT_ADC3_window, FFT_ADC4_window, FFT_ADC5_window, freq_window = FFT(data_window)
     FFT_ADC1_padded, FFT_ADC2_padded, FFT_ADC3_padded, FFT_ADC4_padded, FFT_ADC5_padded, freq_padded = FFT(data_padded)
 
-    plt.xlabel("Frekvens [Hz]", fontsize=15)
-    plt.ylabel("Relativ effekt [dB]", fontsize=15)
-    plt.title("Periodogram av $x_{1}[n]$", fontsize=17)
-    plt.plot(freq, 20*np.log10((np.abs(FFT_ADC1)/max(abs(FFT_ADC1)))), label = 'X_1(f)')
-    plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), color = 'g')
-    #plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = 'X_1(f) padded')
-    plt.xlim(-1200,1200)
+    plt.xlabel("Frekvens [Hz]", fontsize=17)
+    plt.ylabel("Relativ effekt [dB]", fontsize=17)
+    plt.title(f"Periodogram av $x_{1}[n]$ med og uten zero-padding", fontsize=19)
+    plt.plot(freq, 20*np.log10((np.abs(FFT_ADC1)/max(abs(FFT_ADC1)))), label = f'$X_{1}(f)$')
+    #plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), label = f'$X_{1}(f)$ med hanningvindu+zero-padding', color = 'orange')
+    plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = f'$X_{1}(f)$ med zero-padding')
+    plt.xlim(-300,300)
     plt.ylim(-120, 5)
-    plt.legend(loc="upper right", fontsize=15)
+    plt.xticks(size = 14)
+    plt.yticks(size = 14)
+    plt.legend(loc="upper right", fontsize=14)
     plt.grid()
     plt.show()
 
@@ -158,10 +235,11 @@ data_window_padded = zero_pad(data_window)
 #The padded data windowed
 data_padded_window = window(data_padded)
 
-plot_FFT(data, data_padded_window, data_padded_window)
-#plot_periodogram(data, data_window, data_padded_window)
+#plot_FFT(data, data_window, data_padded)
+plot_periodogram(data, data_window_padded, data_padded)
 
 #plot_data(data)
+
 
 
  
