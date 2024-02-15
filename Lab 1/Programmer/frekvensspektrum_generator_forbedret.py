@@ -26,7 +26,7 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/sampledData_163208.bin') #sampledData_101128 #sys.argv[1] or 
+    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/sampledData_101519.bin') #sampledData_163208.bin #sampledData_101128 #sys.argv[1] or 
     dt = sample_period
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
 
@@ -53,7 +53,7 @@ def analog_signal():
     analog_data = []
     analog_data2 = []
 
-    filepath1 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/Scope_and_ADC_measurements/Scope_CH1_CH2.csv'
+    filepath1 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/CH1_full_range.csv'
     filepath2 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data\Scope_and_ADC_measurements/Scope_CH3_CH4.csv'
 
 
@@ -83,13 +83,13 @@ def analog_signal():
     ch5 = [(ch4[i]+0.7) for i in range(len(ch4))]
 
     plt.plot(time1,ch1, label=f'$x_{1}(t)$', color = 'blue', linestyle='--')
-    plt.plot(time1,ch2, label = f'$x_{2}(t)$', color = 'red', linestyle='--')
-    plt.plot(time2,ch3, label=f'$x_{3}(t)$', color = 'purple', linestyle='--')
-    plt.plot(time2,ch4, label =f'$x_{4}(t)$', color = 'forestgreen', linestyle='--')
-    plt.plot(time2,ch5, label =f'$x_{5}(t)$', color = 'cyan', linestyle='--')
+    #plt.plot(time1,ch2, label = f'$x_{2}(t)$', color = 'red', linestyle='--')
+    #plt.plot(time2,ch3, label=f'$x_{3}(t)$', color = 'purple', linestyle='--')
+    #plt.plot(time2,ch4, label =f'$x_{4}(t)$', color = 'forestgreen', linestyle='--')
+    #plt.plot(time2,ch5, label =f'$x_{5}(t)$', color = 'cyan', linestyle='--')
 
     plt.grid()
-    plt.xlim(0, 0.1)
+    #plt.xlim(0, 0.1)
     plt.title(f'Analoge inngangssignaler til alle ADCer', fontsize = 19)
     plt.xlabel('Tid [s]', fontsize=17)
     plt.ylabel('Spenning [V]', fontsize=17)
@@ -102,14 +102,13 @@ def analog_signal():
 
     return time1, ch1
 
+#analog_signal()
 
 def plot_data(data_plot):
     #Tidsakse for samplede signaler
     t = np.arange(0, dt*len(data_plot[:, 0]), dt)
 
     colours = ['blue', 'red', 'purple', 'forestgreen', 'cyan']
-
-    print(np.transpose(data_plot))
     
     for i in range(len(data_plot[0, :])):
         if i == 4:
@@ -140,7 +139,8 @@ def plot_data(data_plot):
 
 
 def zero_pad(data_pad):
-    n = 2**int(np.ceil(np.log2(len(data_pad)))) - len(data_pad)
+    n = 3*(len(data_pad)-1)
+    print(n)
     #n = 100000
 
     data_pad_copy = data_pad.copy()
@@ -195,7 +195,7 @@ def plot_FFT(data, data_window, data_padded):
     plt.ylabel("Relativ effekt [dB]", fontsize=15)
     plt.title("Periodogram av $x_{1}[n]$", fontsize=17)
     plt.plot(freq, abs(FFT_ADC1)/max(abs(FFT_ADC1)))
-    plt.plot(freq_window, abs(FFT_ADC1_window)//max(abs(FFT_ADC1_window)), color = 'g')
+    #plt.plot(freq_window, abs(FFT_ADC1_window)//max(abs(FFT_ADC1_window)), color = 'g')
     #plt.plot(freq_padded, abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)), color = 'r')
     plt.xlim(-100,100)
     #plt.ylim(-140, 5)
@@ -211,12 +211,12 @@ def plot_periodogram(data_original, data_window, data_padded):
 
     plt.xlabel("Frekvens [Hz]", fontsize=17)
     plt.ylabel("Relativ effekt [dB]", fontsize=17)
-    plt.title(f"Periodogram av $x_{1}[n]$", fontsize=19)
+    plt.title(f"Støy i $X_{1}(f)$", fontsize=19)
     plt.plot(freq, 20*np.log10((np.abs(FFT_ADC1)/max(abs(FFT_ADC1)))), label = f'$X_{1}(f)$')
     #plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC1_window)/max(abs(FFT_ADC1_window)))), label = f'$X_{1}(f)$ med hanningvindu', color = 'g')
-    #plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = f'$X_{1}(f)$ med zero-padding')
-    plt.xlim(-300,300)
-    plt.ylim(-120, 5)
+    plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'orange', label = f'$X_{1}(f)$ med hanningvindu+zero-padding')
+    #plt.xlim(-300,300)
+    #plt.ylim(-130, 5)
     plt.xticks(size = 14)
     plt.yticks(size = 14)
     plt.legend(loc="upper right", fontsize=14)
@@ -236,7 +236,7 @@ data_window_padded = zero_pad(data_window)
 
 #The padded data windowed
 data_padded_window = window(data_padded)
-
+print(len(data), len(data_padded))
 #plot_FFT(data, data_window, data_padded)
 plot_periodogram(data, data_window, data_window_padded)
 
