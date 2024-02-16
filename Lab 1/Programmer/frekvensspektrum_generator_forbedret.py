@@ -8,8 +8,6 @@ import csv
 import scipy.signal as ss
 import time
 
-start_time = time.time()
-
 def raspi_import(path, channels=5):
 
     with open(path, 'r') as fid:
@@ -26,36 +24,17 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/sampledData_101519.bin') #sampledData_163208.bin #sampledData_101128 #sys.argv[1] or 
+    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/sampledData_163208.bin') 
     dt = sample_period
-    data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
-
-    dc_comp = 1.66
+    data = (data*3.308)/(2**12)
 
     data = ss.detrend(data, axis=0)
 
-def artificial_data():
-
-    n = 31250
-
-    t = np.arange(0, dt*n, dt)
-    x = np.sin(2*np.pi*300*t) + np.sin(2*np.pi*2200*t) + np.sin(2*np.pi*6000*t)
-
-    x_arr = np.array([x] * 5)
-
-    x_transpose = np.transpose(x_arr)
-
-    return x_transpose
-
 def analog_signal():
 
-    header = []
     analog_data = []
-    analog_data2 = []
 
-    filepath1 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/CH1_full_range.csv'
-    filepath2 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data\Scope_and_ADC_measurements/Scope_CH3_CH4.csv'
-
+    filepath1 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data/scope_CH1_new/CH1_new.csv'
 
     # Read data from the specified filepath
     with open(filepath1) as csvfile:
@@ -67,29 +46,20 @@ def analog_signal():
 
     time1 = [p[0] for p in analog_data]
     ch1 = [p[1] for p in analog_data]
-    ch2 = [p[2] for p in analog_data]
-
-    # Read data from the specified filepath
-    with open(filepath2) as csvfile:
-        csvreader = csv.reader(csvfile)
-        header = next(csvreader)
-        for datapoint in csvreader:
-            values = [float(value) for value in datapoint]
-            analog_data2.append(values)
-
-    time2 = [p[0] for p in analog_data2]
-    ch3 = [p[1] for p in analog_data2]
-    ch4 = [p[2] for p in analog_data2]
-    ch5 = [(ch4[i]+0.7) for i in range(len(ch4))]
+    #ch1 = ss.detrend(ch1, axis=0)
+    ch2 = [p[1]+0.6*1 for p in analog_data]
+    ch3 = [p[1]+0.6*2 for p in analog_data]
+    ch4 = [p[1]+0.6*3 for p in analog_data]
+    ch5 = [p[1]+0.6*4 for p in analog_data]
 
     plt.plot(time1,ch1, label=f'$x_{1}(t)$', color = 'blue', linestyle='--')
-    #plt.plot(time1,ch2, label = f'$x_{2}(t)$', color = 'red', linestyle='--')
-    #plt.plot(time2,ch3, label=f'$x_{3}(t)$', color = 'purple', linestyle='--')
-    #plt.plot(time2,ch4, label =f'$x_{4}(t)$', color = 'forestgreen', linestyle='--')
-    #plt.plot(time2,ch5, label =f'$x_{5}(t)$', color = 'cyan', linestyle='--')
+    plt.plot(time1,ch2, label = f'$x_{2}(t)$', color = 'red', linestyle='--')
+    plt.plot(time1,ch3, label=f'$x_{3}(t)$', color = 'purple', linestyle='--')
+    plt.plot(time1,ch4, label =f'$x_{4}(t)$', color = 'forestgreen', linestyle='--')
+    plt.plot(time1,ch5, label =f'$x_{5}(t)$', color = 'cyan', linestyle='--')
 
     plt.grid()
-    #plt.xlim(0, 0.1)
+    plt.xlim(0, 0.1)
     plt.title(f'Analoge inngangssignaler til alle ADCer', fontsize = 19)
     plt.xlabel('Tid [s]', fontsize=17)
     plt.ylabel('Spenning [V]', fontsize=17)
@@ -102,34 +72,30 @@ def analog_signal():
 
     return time1, ch1
 
-#analog_signal()
-
 def plot_data(data_plot):
     #Tidsakse for samplede signaler
-    t = np.arange(0, dt*len(data_plot[:, 0]), dt)
+    t = np.arange(0, dt*(len(data_plot[:, 0])-1), dt)
 
     colours = ['blue', 'red', 'purple', 'forestgreen', 'cyan']
     
     for i in range(len(data_plot[0, :])):
-        if i == 4:
-            data_plot[:, i:(i+1)] += 0.7
-        elif i == 0:
+        if i == 0:
             data_plot[:, i:(i+1)] += 0
         else:
-            data_plot[:, i:(i+1)] += 0.06
+            data_plot[:, i:(i+1)] += 0.6*i
 
-    #time_analog, ch1 = analog_signal()
-    #plt.plot(time_analog,ch1, label=f'$x_{1}(t)$', color = 'blue', linestyle='--')
+    plt.plot(t, data_plot[1:, 0], label=f'$x_{1}[n]$', color = colours[0])
+    plt.plot(t, data_plot[1:, 1], label=f'$x_{2}[n]$', color = colours[1])
+    plt.plot(t, data_plot[1:, 2], label=f'$x_{3}[n]$', color = colours[2])
+    plt.plot(t, data_plot[1:, 3], label=f'$x_{4}[n]$', color = colours[3])
+    plt.plot(t, data_plot[1:, 4], label=f'$x_{5}[n]$', color = colours[4])
 
-    plt.plot(t, data_plot[:, 0], label=f'$x_{1}[n]$', color = colours[0])
-    plt.plot(t, data_plot[:, 1], label=f'$x_{2}[n]$', color = colours[1])
-    plt.plot(t, data_plot[:, 2], label=f'$x_{3}[n]$', color = colours[2])
-    plt.plot(t, data_plot[:, 3], label=f'$x_{4}[n]$', color = colours[3])
-    plt.plot(t, data_plot[:, 4], label=f'$x_{5}[n]$', color = colours[4])
+    # time_analog, ch1 = analog_signal()
+    # plt.plot(time_analog,ch1, label=f'$x_{1}(t)$', color = 'blue', linestyle='--')
 
     plt.xlabel("Tid [s]", fontsize=17)
     plt.ylabel("Spenning [V]", fontsize=17)
-    plt.title(f'Samplet signal av alle ADCer', fontsize = 19)
+    plt.title(f'Analogt og digitalt signal for $x_{1}(t)$', fontsize = 19)
     plt.legend(loc="upper right", fontsize=15)
     plt.xlim(0,0.1)
     plt.xticks(fontsize=14)
@@ -140,8 +106,6 @@ def plot_data(data_plot):
 
 def zero_pad(data_pad):
     n = 3*(len(data_pad)-1)
-    print(n)
-    #n = 100000
 
     data_pad_copy = data_pad.copy()
 
@@ -223,8 +187,6 @@ def plot_periodogram(data_original, data_window, data_padded):
     plt.grid()
     plt.show()
 
-x = artificial_data()
-
 #The original data zero-padded
 data_padded = zero_pad(data)
 
@@ -236,10 +198,9 @@ data_window_padded = zero_pad(data_window)
 
 #The padded data windowed
 data_padded_window = window(data_padded)
-print(len(data), len(data_padded))
-#plot_FFT(data, data_window, data_padded)
-plot_periodogram(data, data_window, data_window_padded)
 
+#plot_FFT(data, data_window, data_padded)
+#plot_periodogram(data, data_window, data_window_padded)
 #plot_data(data)
 
 
