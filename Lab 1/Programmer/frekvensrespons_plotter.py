@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import csv
+from matplotlib.ticker import FuncFormatter
+import numpy as np 
 
 def readCSV (path):
   print(path)
@@ -15,6 +17,8 @@ def readCSV (path):
         values = [float(value) for value in datapoint]
         data.append(values)
   return data
+
+
 
 def magnitude(dataList, dataLabel):
   #Figure size (x,y) in inches. Move Legend if changed drasticly to avoid clipping
@@ -43,9 +47,17 @@ def magnitude(dataList, dataLabel):
     plt.plot(time, measurement, "-")
 
   #Add lines for 3 dB
-  plt.hlines([-3,-3],2,26.76,'red','solid')
-  plt.vlines([26.76,26.76],-35,-3,'red','solid')
-  plt.text(24.7,-37,"26.7 Hz")
+  plt.hlines([-3,-3],2,26.76,'grey','dashed')
+  plt.vlines([26.76,26.76],-25,-3,'grey','dashed')
+  plt.text(27.5,-26.5,"$f_c$",fontsize = 20) #26.7 Hz
+  #plt.hlines([-3,-3],2,26.76,'green','dashed')
+  plt.vlines([23.2,23.2],-25,-1.55,'grey','dashed')
+  plt.vlines([13.89,13.89],-25,1.85,'grey','dashed')
+  plt.hlines([-28,-28],23.2,26.76,'red','solid')
+  plt.vlines([23.2,26.76],-26,-30,'red','solid')
+  plt.text(23,-32,"$\Delta f_c$",fontsize = 20)
+  plt.text(20.5,-26.5,"$f_c'$",fontsize = 20)
+  plt.text(12.5,-26.5,"$f_r$",fontsize = 20)
 
   #labels  
   plt.xlabel("Frekvens [Hz]",fontsize = 18)
@@ -53,11 +65,11 @@ def magnitude(dataList, dataLabel):
 
   
   #legend. Source: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot-in-matplotlib
-  #plt.legend(dataLabel)#, bbox_to_anchor=(0.5, -0.12), loc="upper center",fancybox=True, ncol=8, borderaxespad=0))
+  plt.legend(dataLabel,fontsize = 16)#, bbox_to_anchor=(0.5, -0.12), loc="upper center",fancybox=True, ncol=8, borderaxespad=0))
   plt.tight_layout(rect=[0,0,1,0.98])
 
   #Final touch
-  plt.title('Amplituderespons',fontsize = 18)
+  plt.title("Frekvensrespons til Pi-filter",fontsize = 18)
   plt.grid(True)
   plt.show()
 
@@ -111,6 +123,6 @@ def bodeDiagram(fileList,dataLabel):
   magnitude(dataList, dataLabel)
   phase(dataList, dataLabel)
 
-files = ["C:/Users/cmhei/OneDrive/Dokumenter/Semester 6/TTK4280 Sensorer og instrumentering/Lab/Lab1/Programmer/network_data.csv"]
+files = ["network_data.csv"]
 dataLabel = ["Amplituderespons"]
 bodeDiagram(files, dataLabel)
