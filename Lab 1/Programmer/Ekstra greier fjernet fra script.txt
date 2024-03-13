@@ -1,0 +1,23 @@
+    dc_comp = 1.66
+
+    #data -= dc_comp
+
+#sampledData_163208.bin
+
+
+filepath2 = r'C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 1/Data\Scope_and_ADC_measurements/Scope_CH3_CH4.csv'
+
+    #ch2 = [p[2] for p in analog_data]
+
+    # Read data from the specified filepath
+    # with open(filepath2) as csvfile:
+    #     csvreader = csv.reader(csvfile)
+    #     header = next(csvreader)
+    #     for datapoint in csvreader:
+    #         values = [float(value) for value in datapoint]
+    #         analog_data2.append(values)
+
+    time2 = [p[0] for p in analog_data2]
+    ch3 = [p[1] for p in analog_data2]
+    ch4 = [p[2] for p in analog_data2]
+    ch5 = [(ch4[i]+0.7) for i in range(len(ch4))]
