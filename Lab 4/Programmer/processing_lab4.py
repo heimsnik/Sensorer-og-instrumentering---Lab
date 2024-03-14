@@ -24,7 +24,7 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 4/Data/test_run.bin')
+    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 4/Data/speed3_data4.bin')
     dt = sample_period
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
 
@@ -85,23 +85,30 @@ def FFT(data_FFT):
 
     data_FFT_copy = data_FFT.copy()
 
+    # Perform FFT on ADC4 (real component)
     FFT_ADC4 = np.fft.fftshift(np.fft.fft(data_FFT_copy[1:, 3], len(data_FFT_copy[1:, 0])))
+
+    # Perform FFT on ADC5 (imaginary component)
     FFT_ADC5 = np.fft.fftshift(np.fft.fft(data_FFT_copy[1:, 4], len(data_FFT_copy[1:, 0])))
 
-    #Frekvensakse
+    # Create frequency axis
     freq = np.fft.fftshift(np.fft.fftfreq(n=len(FFT_ADC4), d=sample_period))
 
-    return FFT_ADC4, FFT_ADC5, freq
+    # Combine real and imaginary components into complex FFT
+    FFT_complex = FFT_ADC4 + 1j * FFT_ADC5
+
+    return FFT_complex, freq
+
 
 def plot_FFT(data, data_window, data_padded):
-    FFT_ADC4, FFT_ADC5, freq = FFT(data)
-    FFT_ADC4_window, FFT_ADC5_window, freq_window = FFT(data_window)
-    FFT_ADC4_padded, FFT_ADC5_padded, freq_padded = FFT(data_padded)
+    FFT_normal, freq = FFT(data)
+    #FFT_window, freq_window = FFT(data_window)
+    #FFT_padded, freq_padded = FFT(data_padded)
 
     plt.xlabel("Frekvens [Hz]", fontsize=15)
     plt.ylabel("y-akse", fontsize=15)
     plt.title("FFT av $x_{1}[n]$", fontsize=17)
-    plt.plot(freq, abs(FFT_ADC4)/max(abs(FFT_ADC4)))
+    plt.plot(freq, abs(FFT_normal)/max(abs(FFT_normal)))
     #plt.plot(freq_window, abs(FFT_ADC4_window)//max(abs(FFT_ADC4_window)), color = 'g')
     #plt.plot(freq_padded, abs(FFT_ADC4_padded)/max(abs(FFT_ADC4_padded)), color = 'r')
     plt.xlim(-300,300)
@@ -112,17 +119,17 @@ def plot_FFT(data, data_window, data_padded):
 
 
 def plot_periodogram(data_original, data_window, data_padded):
-    FFT_ADC4, FFT_ADC5, freq = FFT(data_original)
-    FFT_ADC4_window, FFT_ADC5_window, freq_window = FFT(data_window)
-    FFT_ADC4_padded, FFT_ADC5_padded, freq_padded = FFT(data_padded)
+    FFT_normal, freq = FFT(data_original)
+    FFT_window, freq_window = FFT(data_window)
+    FFT_padded, freq_padded = FFT(data_padded)
 
     plt.xlabel("Frekvens [Hz]", fontsize=17)
     plt.ylabel("Relativ effekt [dB]", fontsize=17)
     plt.title(f"Periodogram", fontsize=19)
-    plt.plot(freq, 20*np.log10((np.abs(FFT_ADC4)/max(abs(FFT_ADC4)))), label = f'$IF_I$')
+    plt.plot(freq, 20*np.log10((np.abs(FFT_normal)/max(abs(FFT_normal)))), label = f'$IF_I$')
     #plt.plot(freq_window, 20*np.log10((np.abs(FFT_ADC4_window)/max(abs(FFT_ADC4_window)))), label = f'$X_{1}(f)$ med hanningvindu', color = 'g')
     #plt.plot(freq_padded, 20*np.log10((np.abs(FFT_ADC1_padded)/max(abs(FFT_ADC1_padded)))), color = 'r', label = f'$X_{1}(f)$ med zero-padding')
-    plt.xlim(-300,300)
+    #plt.xlim(-300,300)
     plt.ylim(-120, 5)
     plt.xticks(size = 14)
     plt.yticks(size = 14)
