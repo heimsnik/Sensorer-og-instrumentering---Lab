@@ -24,7 +24,7 @@ def raspi_import(path, channels=5):
 
 # Import data from bin file
 if __name__ == "__main__":
-    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 2/Data/Calibration_90_deg/sampledData_180808.bin') #sampledData_101128 #sys.argv[1] or 
+    sample_period, data = raspi_import('C:/Users/bruker/OneDrive - NTNU/6. semester/TTT4280 Sensorer og instrumentering/Lab/Sensorer-og-instrumentering---Lab/Lab 2/Data/Målinger_rapport/Calibration_300_deg/sampledData_172137.bin') #sampledData_101128 #sys.argv[1] or 
     dt = sample_period
     data = (data*3.308)/(2**12)  #Formel fra labhefte, skrive noe lurt om denne i rapporten. data*Vref/(4096)
 
@@ -242,54 +242,51 @@ data_padded_window = window(data_padded)
 def correlation(data):
 
     #Eks autokorrelasjon
-    r_11 = ss.correlate(data[1:, 0:1], data[1:, 0:1])
+    r_11 = ss.correlate(data[1:, 0], data[1:, 0])
 
     #Korrelasjon mellom alle sensorer
-    r_12 = ss.correlate(data[1:, 0:1], data[1:, 1:2])
-    r_23 = ss.correlate(data[1:, 1:2], data[1:, 2:3])
-    r_13 = ss.correlate(data[1:, 0:1], data[1:, 2:3])
+    r_21 = ss.correlate(data[1:, 1], data[1:, 0])
+    r_32 = ss.correlate(data[1:, 2], data[1:, 1])
+    r_31 = ss.correlate(data[1:, 2], data[1:, 0])
 
-    t_r = ss.correlation_lags(len(data[1:, 0:1]), len(data[1:, 0:1]))
+    t_r = ss.correlation_lags(len(data[1:, 0]), len(data[1:, 0]))
 
-    return t_r, r_12, r_23, r_13, r_11
+    return t_r, r_21, r_32, r_31, r_11
 
 def n_values():
 
-    t_r, r_12, r_23, r_13, r_11 = correlation(data)
+    t_r, r_21, r_32, r_31, r_11 = correlation(data)
 
-    max_12 = np.argmax(r_12)
-    max_23 = np.argmax(r_23)
-    max_13 = np.argmax(r_13)
+    max_21 = np.argmax(r_21)
+    max_32 = np.argmax(r_32)
+    max_31 = np.argmax(r_31)
 
-    n_12 = t_r[max_12]
-    n_23 = t_r[max_23]
-    n_13 = t_r[max_13]
+    n_21 = t_r[max_21]
+    n_32 = t_r[max_32]
+    n_31 = t_r[max_31]
 
-    return n_12, n_23, n_13
+    return n_21, n_32, n_31
 
 def calc_angles():
 
-    l12_max, l23_max, l13_max = n_values()
+    l21_max, l32_max, l31_max = n_values()
 
-    print(l12_max)
-    print(l23_max)
-    print(l13_max)
-
-    y = np.sqrt(3)*(l12_max+l13_max)
-    x = (l12_max-l13_max-2*l23_max)
+    y = np.sqrt(3)*(l21_max+l31_max)
+    x = (l21_max-l31_max-2*l32_max)
 
     arg = y/x
 
     print('Cosine: ' + str(np.cos(arg))) 
     print('Sine: ' + str(np.sin(arg)))
 
-    deg = np.arctan2(y, x)
+    theta = 0
+    if(x == 0):
+        x = np.pi/2
+        theta = np.arctan2(y, x)
+    else:   
+        theta = np.arctan2(y, x)
 
-    if (-l12_max+l13_max+2*l23_max) < 0:
-        print('lalala')
-        deg += np.pi
-
-    return np.degrees(deg)
+    return np.degrees(theta)
 
 
 def plot_correlation(data):
@@ -309,9 +306,9 @@ def plot_correlation(data):
     #Autocorrelation
     #ax[1].plot(t_r, r_11, label = f'$r_{11}$')
     #Crosscorrelation
-    ax[1].plot(t_r, r_12, label = f'$r_{12}$')
-    ax[1].plot(t_r, r_23, label = f'$r_{23}$')
-    ax[1].plot(t_r, r_13, label = f'$r_{13}$')
+    ax[1].plot(t_r, r_12, label = f'$r_{{21}}$')
+    ax[1].plot(t_r, r_23, label = f'$r_{{32}}$')
+    ax[1].plot(t_r, r_13, label = f'$r_{{31}}$')
     #ax[1].set_xlim(-60, 60)
     ax[1].legend(loc="upper right")
     ax[1].set_xlabel("Time [s]")
